@@ -40,7 +40,7 @@ import kotlin.system.exitProcess
 class SettingDialog(context: Context) : AlertDialog.Builder(context) {
 
     class PrefsFragment : PreferenceFragment(), Preference.OnPreferenceChangeListener,
-        Preference.OnPreferenceClickListener {
+            Preference.OnPreferenceClickListener {
         private val scope = MainScope()
         private lateinit var prefs: SharedPreferences
         private lateinit var biliprefs: SharedPreferences
@@ -52,8 +52,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             addPreferencesFromResource(R.xml.prefs_setting)
             prefs = preferenceManager.sharedPreferences
             biliprefs = currentContext.getSharedPreferences(
-                packageName + "_preferences",
-                Context.MODE_MULTI_PROCESS
+                    packageName + "_preferences",
+                    Context.MODE_MULTI_PROCESS
             )
             if (!prefs.getBoolean("hidden", false)) {
                 val hiddenGroup = findPreference("hidden_group") as PreferenceCategory
@@ -64,7 +64,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             findPreference("custom_splash")?.onPreferenceChangeListener = this
             findPreference("custom_splash_logo")?.onPreferenceChangeListener = this
             findPreference("save_log")?.summary =
-                moduleRes.getString(R.string.save_log_summary).format(logFile.absolutePath)
+                    moduleRes.getString(R.string.save_log_summary).format(logFile.absolutePath)
             findPreference("custom_server")?.onPreferenceClickListener = this
             findPreference("test_upos")?.onPreferenceClickListener = this
             findPreference("customize_bottom_bar")?.onPreferenceClickListener = this
@@ -92,17 +92,17 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 if (newestVer.isNotEmpty() && BuildConfig.VERSION_NAME != newestVer) {
                     findPreference("version").summary = "${BuildConfig.VERSION_NAME}（最新版$newestVer）"
                     (findPreference("about") as PreferenceCategory).addPreference(
-                        Preference(
-                            activity
-                        ).apply {
-                            key = "update"
-                            title = moduleRes.getString(R.string.update_title)
-                            summary = result.optString("body").substringAfterLast("更新日志\r\n").run {
-                                ifEmpty { moduleRes.getString(R.string.update_summary) }
-                            }
-                            onPreferenceClickListener = this@PrefsFragment
-                            order = 1
-                        })
+                            Preference(
+                                    activity
+                            ).apply {
+                                key = "update"
+                                title = moduleRes.getString(R.string.update_title)
+                                summary = result.optString("body").substringAfterLast("更新日志\r\n").run {
+                                    ifEmpty { moduleRes.getString(R.string.update_summary) }
+                                }
+                                onPreferenceClickListener = this@PrefsFragment
+                                order = 1
+                            })
                 }
             }
         }
@@ -119,6 +119,16 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             val supportMain = !isBuiltIn || !is64 || Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
             var supportDrawer = instance.homeUserCenterClass != null
             when (platform) {
+                //自定义底栏
+                "android_i" -> {
+                    if (versionCode >= 3000000) supportAddChannel = true
+                }
+                "android_b" -> {
+                    if (versionCode >= 6270000) supportAddChannel = true
+                }
+                "android" -> {
+                    if (versionCode >= 6270000) supportAddChannel = true
+                }
                 "android_hd" -> {
                     supportCustomizeTab = false
                     supportDrawer = false
@@ -140,8 +150,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             }
             if (!supportMusicNotificationHook) {
                 disablePreference(
-                    "music_notification",
-                    moduleRes.getString(R.string.os_not_support)
+                        "music_notification",
+                        moduleRes.getString(R.string.os_not_support)
                 )
             }
             if (!supportMain) {
@@ -149,6 +159,10 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
             }
             if (!supportTeenagersMode) {
                 disablePreference("teenagers_mode_dialog")
+            }
+            //自定义底栏
+            if (!supportAddChannel) {
+                disablePreference("add_channel")
             }
             if (!supportCustomizeTab) {
                 disablePreference("customize_home_tab_title")
@@ -160,8 +174,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
         }
 
         private fun disablePreference(
-            name: String,
-            message: String = moduleRes.getString(R.string.not_support)
+                name: String,
+                message: String = moduleRes.getString(R.string.not_support)
         ) {
             findPreference(name)?.run {
                 isEnabled = false
@@ -224,7 +238,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     val stream = ByteArrayOutputStream()
                     stream.flush()
                     MediaStore.Images.Media.getBitmap(activity.contentResolver, uri)
-                        .compress(Bitmap.CompressFormat.PNG, 100, stream)
+                            .compress(Bitmap.CompressFormat.PNG, 100, stream)
                     val dest = FileOutputStream(destFile)
                     stream.writeTo(dest)
                 }
@@ -248,7 +262,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                             try {
                                 file.inputStream().use { `in` ->
                                     activity.contentResolver.openOutputStream(uri)
-                                        ?.let { `in`.copyTo(it) }
+                                            ?.let { `in`.copyTo(it) }
                                 }
                             } catch (e: Exception) {
                                 e.printStackTrace()
@@ -266,7 +280,7 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                     try {
                         videosToExport.forEach { video ->
                             targetDir.findOrCreateDir(video.parentFile!!.name)
-                                ?.let { DocumentFile.fromFile(video).copyTo(activity, it) }
+                                    ?.let { DocumentFile.fromFile(video).copyTo(activity, it) }
                         }
                         Log.toast("导出成功", true)
                     } catch (e: Exception) {
@@ -306,10 +320,10 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 val inflater = LayoutInflater.from(context)
                 val view = inflater.inflate(layout, null)
                 val editTexts = arrayOf(
-                    view.findViewById<EditText>(R.id.cn_server),
-                    view.findViewById(R.id.hk_server),
-                    view.findViewById(R.id.tw_server),
-                    view.findViewById(R.id.th_server)
+                        view.findViewById<EditText>(R.id.cn_server),
+                        view.findViewById(R.id.hk_server),
+                        view.findViewById(R.id.tw_server),
+                        view.findViewById(R.id.th_server)
                 )
                 editTexts.forEach { it.setText(prefs.getString(it.tag.toString(), "")) }
                 setTitle("设置解析服务器")
@@ -409,10 +423,10 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
                 val inflater = LayoutInflater.from(context)
                 val view = inflater.inflate(layout, null)
                 val editTexts = arrayOf(
-                    view.findViewById<EditText>(R.id.cn_server),
-                    view.findViewById(R.id.hk_server),
-                    view.findViewById(R.id.tw_server),
-                    view.findViewById(R.id.th_server)
+                        view.findViewById<EditText>(R.id.cn_server),
+                        view.findViewById(R.id.hk_server),
+                        view.findViewById(R.id.tw_server),
+                        view.findViewById(R.id.th_server)
                 )
                 editTexts.forEach {
                     it.setText(prefs.getString("${it.tag}_accessKey", ""))
@@ -480,16 +494,16 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
         prefsFragment.onActivityCreated(null)
 
         val unhook =
-            Preference::class.java.hookAfterMethod("onCreateView", ViewGroup::class.java) { param ->
-                if (PreferenceCategory::class.java.isInstance(param.thisObject) && TextView::class.java.isInstance(
-                        param.result
-                    )
-                ) {
-                    val textView = param.result as TextView
-                    if (textView.textColors.defaultColor == -13816531)
-                        textView.setTextColor(Color.GRAY)
+                Preference::class.java.hookAfterMethod("onCreateView", ViewGroup::class.java) { param ->
+                    if (PreferenceCategory::class.java.isInstance(param.thisObject) && TextView::class.java.isInstance(
+                                    param.result
+                            )
+                    ) {
+                        val textView = param.result as TextView
+                        if (textView.textColors.defaultColor == -13816531)
+                            textView.setTextColor(Color.GRAY)
+                    }
                 }
-            }
 
         setView(prefsFragment.view)
         setTitle("哔哩漫游设置")
@@ -517,8 +531,8 @@ class SettingDialog(context: Context) : AlertDialog.Builder(context) {
         fun addModulePath(context: Context) {
             val assets = context.resources.assets
             assets.callMethod(
-                "addAssetPath",
-                modulePath
+                    "addAssetPath",
+                    modulePath
             )
         }
 
